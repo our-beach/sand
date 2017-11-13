@@ -1,9 +1,8 @@
-import React, { Component } from 'react';
+import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-class App extends Component {
-  render() {
+export default function App(props) {
     return (
       <div className="App">
         <header className="App-header">
@@ -11,11 +10,20 @@ class App extends Component {
           <h1 className="App-title">Welcome to React</h1>
         </header>
         <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
+          Our first stuff.
         </p>
+        <div onClick={ props.increment }>
+            +
+        </div>
+        <div>
+            { props.count }
+        </div>
+        <div onClick={ props.decrement }>
+            -
+        </div>
+        <div onClick={ props.dumb }>
+            dumb
+        </div>
       </div>
     );
-  }
 }
-
-export default App;

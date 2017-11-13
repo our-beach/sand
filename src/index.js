@@ -7,10 +7,10 @@ import { createStore } from 'redux';
 
 registerServiceWorker()
 
-const defaultState = []
-for (let i = 0; i < 120; i++) {
-    defaultState[i] = 0
-}
+const defaultState = [0,0,0,0,0,0,0,0,0,0]
+// for (let i = 0; i < 1000; i++) {
+//     defaultState[i] = 0
+// }
 
 const counter = (state = defaultState, action) => {
     switch(action.type) {

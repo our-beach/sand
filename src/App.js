@@ -11,7 +11,7 @@ export default function App(props) {
         <h1 className="App-title">Welcome to React</h1>
       </header>
       <p className="App-intro">
-        Our first stuff.
+        Please enter your phone number:
       </p>
       <div className="Counters">
         {props.count.map((value, index) => {

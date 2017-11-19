@@ -17,10 +17,37 @@ const setAmplitude = (amplitudes, targetIndex, targetValue) => {
   }
 }
 
+const interpolateAmplitudes = (amplitudes, startIndex, startValue, endIndex, endValue) => {
+  if (endIndex < startIndex)
+    return interpolateAmplitudes(
+      amplitudes,
+      endIndex,
+      endValue,
+      startIndex,
+      startValue
+    )
+
+  const slope = (endValue.value - startValue.value) / (endIndex - startIndex)
+  const prior = amplitudes.slice(0, startIndex)
+  const posterior = amplitudes.slice(endIndex + 1)
+  const modified = amplitudes.slice(startIndex, endIndex + 1)
+    .map(({ value }, idx) => amplitude((slope * idx) + startValue.value))
+
+  return prior.concat(modified).concat(posterior)
+}
+
 const amplitudes = (state = [], action) => {
   switch (action.type) {
     case 'SET_AMPLITUDE':
       return setAmplitude(state, action.index, action.value)
+    case 'INTERPOLATE_AMPLITUDES':
+      return interpolateAmplitudes(
+        state,
+        action.startIndex,
+        action.startValue,
+        action.endIndex,
+        action.endValue
+      )
     default:
       return state
   }
@@ -29,9 +56,18 @@ const amplitudes = (state = [], action) => {
 const mouse = (state = {}, action) => {
   switch (action.type) {
     case 'SET_MOUSE_DOWN':
-      return { ...state, down: true }
+      return {
+        ...state,
+        down: true,
+        lastPosition: action.position
+      }
     case 'SET_MOUSE_UP':
       return { ...state, down: false }
+    case 'SET_LAST_MOUSE_POSITION':
+      return {
+        ...state,
+        lastPosition: action.position
+      }
     default:
       return state
   }
@@ -44,7 +80,7 @@ const appReducer = combineReducers({
 
 const amplitude = x => ({ value: x })
 const initialState = {
-  mouse: { down: false },
+  mouse: { down: false, lastPosition: [] },
   amplitudes: Array(256).fill(null).map((_, idx) =>
     amplitude(Math.sin(idx / (10 * Math.PI)))
   ),
@@ -58,6 +94,7 @@ const store = createStore(
 
 const onMouseDown = e => store.dispatch({
   type: 'SET_MOUSE_DOWN',
+  position: [e.evt.layerX, e.evt.layerY],
 })
 
 const onMouseUp = e => store.dispatch({
@@ -75,14 +112,23 @@ const pixelToAmplitude = (screenHeight, y) =>
 
 const onMove = e => {
   const { evt: { layerX, layerY } } = e
-  const { amplitudes, mouse: { down } } = store.getState()
+  const { amplitudes, mouse: { down, lastPosition } } = store.getState()
+  const [lastX, lastY] = lastPosition
 
-  if (down)
-    return store.dispatch({
-      type: 'SET_AMPLITUDE',
-      index: pixelToIndex(SCREEN_WIDTH, amplitudes.length, layerX),
-      value: pixelToAmplitude(SCREEN_HEIGHT, layerY),
+  if (down) {
+    store.dispatch({
+      type: 'INTERPOLATE_AMPLITUDES',
+      startIndex: pixelToIndex(SCREEN_WIDTH, amplitudes.length, lastX),
+      startValue: pixelToAmplitude(SCREEN_HEIGHT, lastY),
+      endIndex: pixelToIndex(SCREEN_WIDTH, amplitudes.length, layerX),
+      endValue: pixelToAmplitude(SCREEN_HEIGHT, layerY),
     })
+
+    store.dispatch({
+      type: 'SET_LAST_MOUSE_POSITION',
+      position: [layerX, layerY]
+    })
+  }
   else
     return Promise.resolve(null)
 }

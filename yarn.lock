@@ -2497,7 +2497,7 @@ fb-watchman@^2.0.0:
   dependencies:
     bser "^2.0.0"
 
-fbjs@^0.8.1, fbjs@^0.8.16:
+fbjs@^0.8.1, fbjs@^0.8.14, fbjs@^0.8.16:
   version "0.8.16"
   resolved "https://registry.yarnpkg.com/fbjs/-/fbjs-0.8.16.tgz#5e67432f550dc41b572bf55847b8aca64e5337db"
   dependencies:
@@ -3956,6 +3956,10 @@ klaw@^1.0.0:
   optionalDependencies:
     graceful-fs "^4.1.9"
 
+konva@^1.7.6:
+  version "1.7.6"
+  resolved "https://registry.yarnpkg.com/konva/-/konva-1.7.6.tgz#7aceef1058b04127077c8f44653556b35b1133e6"
+
 latest-version@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/latest-version/-/latest-version-2.0.0.tgz#56f8d6139620847b8017f8f1f4d78e211324168b"
@@ -5340,12 +5344,28 @@ react-jss@^7.2.0:
     prop-types "^15.5.8"
     theming "^1.1.0"
 
+react-konva@^1.6.2:
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/react-konva/-/react-konva-1.6.2.tgz#03720beb9422717d00dee5942c87800c3ba1afde"
+  dependencies:
+    fbjs "^0.8.14"
+    react-reconciler "^0.5.0"
+
 react-popper@^0.7.4:
   version "0.7.4"
   resolved "https://registry.yarnpkg.com/react-popper/-/react-popper-0.7.4.tgz#8649d539837e7c6f47bc9b24c9cf57a404e199a1"
   dependencies:
     popper.js "^1.12.5"
     prop-types "^15.5.10"
+
+react-reconciler@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/react-reconciler/-/react-reconciler-0.5.0.tgz#4c4cdfa2ec8f4f35ebf6305ed65fcef9b3d5d6e7"
+  dependencies:
+    fbjs "^0.8.16"
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+    prop-types "^15.6.0"
 
 react-redux@^5.0.6:
   version "5.0.6"

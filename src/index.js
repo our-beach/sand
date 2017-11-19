@@ -1,74 +1,105 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { combineReducers, createStore } from 'redux';
 import './index.css';
-import App from './App';
 import registerServiceWorker from './registerServiceWorker';
-import { createStore } from 'redux';
+import WoolyWilly from './WoolyWilly'
 
 registerServiceWorker()
 
-const defaultState = [0,0,0,0,0,0,0,0,0,0]
-// for (let i = 0; i < 1000; i++) {
-//     defaultState[i] = 0
-// }
-
-const counter = (state = defaultState, action) => {
-    switch(action.type) {
-        case "INCREMENT":
-            return [
-                ...state.slice(0, action.index),
-                incrementAt(state, action.index),
-                ...state.slice(action.index + 1)
-            ]
-        case "DECREMENT":
-            return [
-                ...state.slice(0, action.index),
-                decrementAt(state, action.index),
-                ...state.slice(action.index + 1)
-            ]
-        default:
-            return state
-    }
+const setAmplitude = (amplitudes, targetIndex, targetValue) => {
+  if (targetIndex >= amplitudes.length)
+    return amplitudes
+  else {
+    const newAmplitudes = Array.from(amplitudes)
+    newAmplitudes[targetIndex] = targetValue
+    return newAmplitudes
+  }
 }
 
-const incrementAt = (state, index) => state[index] + 1
-const decrementAt = (state, index) => state[index] - 1
+const amplitudes = (state = [], action) => {
+  switch (action.type) {
+    case 'SET_AMPLITUDE':
+      return setAmplitude(state, action.index, action.value)
+    default:
+      return state
+  }
+}
 
-const store = createStore(counter,
-    window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+const mouse = (state = {}, action) => {
+  switch (action.type) {
+    case 'SET_MOUSE_DOWN':
+      return { ...state, down: true }
+    case 'SET_MOUSE_UP':
+      return { ...state, down: false }
+    default:
+      return state
+  }
+}
+
+const appReducer = combineReducers({
+  amplitudes,
+  mouse,
+})
+
+const amplitude = x => ({ value: x })
+const initialState = {
+  mouse: { down: false },
+  amplitudes: Array(256).fill(null).map((_, idx) =>
+    amplitude(Math.sin(idx / (10 * Math.PI)))
+  ),
+}
+
+const store = createStore(
+  appReducer,
+  initialState,
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 )
 
-const onIncrement = (index) => {
-    return () => {
-        return store.dispatch(actionWithIndex(incrementAction, index))
-    }
-}
+const onMouseDown = e => store.dispatch({
+  type: 'SET_MOUSE_DOWN',
+})
 
-const onDecrement = (index) => {
-    return () => {
-        return store.dispatch(actionWithIndex(decrementAction, index))
-    }
-}
+const onMouseUp = e => store.dispatch({
+  type: 'SET_MOUSE_UP',
+})
 
-const actionWithIndex = (action, index) => {
-    return Object.assign({}, action, {index: index})
+const SCREEN_WIDTH = 700
+const SCREEN_HEIGHT = 300
+
+const pixelToIndex = (screenWidth, bufferSize, x) =>
+  Math.round((x * bufferSize) / screenWidth)
+
+const pixelToAmplitude = (screenHeight, y) =>
+  amplitude(1 - ((2 * y) / (screenHeight - 10)))
+
+const onMove = e => {
+  const { evt: { layerX, layerY } } = e
+  const { amplitudes, mouse: { down } } = store.getState()
+
+  if (down)
+    return store.dispatch({
+      type: 'SET_AMPLITUDE',
+      index: pixelToIndex(SCREEN_WIDTH, amplitudes.length, layerX),
+      value: pixelToAmplitude(SCREEN_HEIGHT, layerY),
+    })
+  else
+    return Promise.resolve(null)
 }
 
 const render = () =>
     ReactDOM.render(
-        <App count={ store.getState() }
-             increment={ onIncrement }
-             decrement={ onDecrement } />,
-        document.getElementById('root')
+      <WoolyWilly
+        amplitudes={store.getState().amplitudes}
+        width={SCREEN_WIDTH}
+        height={SCREEN_HEIGHT}
+        onMouseDown={onMouseDown}
+        onMouseUp={onMouseUp}
+        onMove={onMove}
+      />,
+      document.getElementById('root')
     )
 
 store.subscribe(render)
 render()
 
-const incrementAction = {
-    type: "INCREMENT"
-}
-
-const decrementAction = {
-    type: "DECREMENT"
-}

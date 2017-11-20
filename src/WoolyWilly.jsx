@@ -4,6 +4,7 @@ import {
   Stage,
 } from 'react-konva'
 import Amplitude from './Amplitude'
+import './App.css';
 
 const WoolyWilly = ({ amplitudes, width, height, onMouseDown, onMouseUp, onMove }) => {
   const stepSize = width / amplitudes.length
@@ -11,6 +12,7 @@ const WoolyWilly = ({ amplitudes, width, height, onMouseDown, onMouseUp, onMove 
 
   return (
     <Stage
+      className='Stage'
       width={width}
       height={height}
       onContentMousedown={onMouseDown}

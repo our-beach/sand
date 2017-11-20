@@ -34,3 +34,7 @@
   animation: App-logo-spin infinite 20s linear;
   display: inline;
 }
+
+.Stage {
+  border: 1px solid black;
+}

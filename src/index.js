@@ -7,6 +7,9 @@ import WoolyWilly from './WoolyWilly'
 
 registerServiceWorker()
 
+const bufferLength = 256
+const sampleRate = 112640
+
 const setAmplitude = (amplitudes, targetIndex, targetValue) => {
   if (targetIndex >= amplitudes.length)
     return amplitudes
@@ -30,9 +33,11 @@ const interpolateAmplitudes = (amplitudes, startIndex, startValue, endIndex, end
   const slope = (endValue.value - startValue.value) / (endIndex - startIndex)
   const prior = amplitudes.slice(0, startIndex)
   const posterior = amplitudes.slice(endIndex + 1)
+  if (endIndex == startIndex)
+    return prior.concat([endValue]).concat(posterior)
   const modified = amplitudes.slice(startIndex, endIndex + 1)
     .map(({ value }, idx) => amplitude((slope * idx) + startValue.value))
-
+  
   return prior.concat(modified).concat(posterior)
 }
 
@@ -81,8 +86,8 @@ const appReducer = combineReducers({
 const amplitude = x => ({ value: x })
 const initialState = {
   mouse: { down: false, lastPosition: [] },
-  amplitudes: Array(256).fill(null).map((_, idx) =>
-    amplitude(Math.sin(idx / (10 * Math.PI)))
+  amplitudes: Array(bufferLength).fill(null).map((_, idx) =>
+    amplitude(Math.sin(idx * 2 * Math.PI / bufferLength))
   ),
 }
 
@@ -149,3 +154,23 @@ const render = () =>
 store.subscribe(render)
 render()
 
+var audioCtx = new window.AudioContext()
+var arrayBuffer = audioCtx.createBuffer(1, bufferLength, sampleRate)
+var source = audioCtx.createBufferSource()
+source.connect(audioCtx.destination)
+source.loop = true
+source.start()
+const beeper = () => {
+  for (var channel = 0; channel < arrayBuffer.numberOfChannels; channel++) {
+    var nowBuffering = arrayBuffer.getChannelData(channel)
+    for (var i = 0; i < arrayBuffer.length; i++) {
+      nowBuffering[i] = store.getState().amplitudes[i]['value']
+    }
+  }
+  console.log(typeof arrayBuffer)
+  console.log(arrayBuffer)
+  source.buffer = arrayBuffer
+}
+
+store.subscribe(beeper)
+beeper()

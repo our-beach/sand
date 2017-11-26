@@ -7,8 +7,10 @@ import WoolyWilly from './WoolyWilly'
 
 registerServiceWorker()
 
-const bufferLength = 256
-const sampleRate = 112640
+const frequency = 440
+const sampleRate = 44100
+
+const bufferLength = Math.floor(sampleRate/frequency)
 
 const setAmplitude = (amplitudes, targetIndex, targetValue) => {
   if (targetIndex >= amplitudes.length)
@@ -33,11 +35,11 @@ const interpolateAmplitudes = (amplitudes, startIndex, startValue, endIndex, end
   const slope = (endValue.value - startValue.value) / (endIndex - startIndex)
   const prior = amplitudes.slice(0, startIndex)
   const posterior = amplitudes.slice(endIndex + 1)
-  if (endIndex == startIndex)
+  if (endIndex === startIndex)
     return prior.concat([endValue]).concat(posterior)
   const modified = amplitudes.slice(startIndex, endIndex + 1)
     .map(({ value }, idx) => amplitude((slope * idx) + startValue.value))
-  
+
   return prior.concat(modified).concat(posterior)
 }
 
@@ -154,22 +156,36 @@ const render = () =>
 store.subscribe(render)
 render()
 
-var audioCtx = new window.AudioContext()
-var arrayBuffer = audioCtx.createBuffer(1, bufferLength, sampleRate)
-var source = audioCtx.createBufferSource()
-source.connect(audioCtx.destination)
-source.loop = true
-source.start()
-const beeper = () => {
+var audioCtx = new window.AudioContext({
+  sampleRate: sampleRate,
+})
+var arrayBuffer = audioCtx.createBuffer(1, bufferLength, audioCtx.sampleRate)
+
+// keeps track of the active audioSourceNode
+var runningSource = null
+
+const createNewBeeper = () => {
+  var source = audioCtx.createBufferSource()
+  source.connect(audioCtx.destination)
   for (var channel = 0; channel < arrayBuffer.numberOfChannels; channel++) {
     var nowBuffering = arrayBuffer.getChannelData(channel)
     for (var i = 0; i < arrayBuffer.length; i++) {
-      nowBuffering[i] = store.getState().amplitudes[i]['value']
+      var value = store.getState().amplitudes[i]['value']
+      if (value !== null)
+        nowBuffering[i] = value
     }
   }
-  console.log(typeof arrayBuffer)
-  console.log(arrayBuffer)
   source.buffer = arrayBuffer
+  source.loop = true
+  source.start()
+  return source
+}
+
+const beeper = () => {
+  if (runningSource !== null)
+    runningSource.stop()
+
+  runningSource = createNewBeeper()
 }
 
 store.subscribe(beeper)

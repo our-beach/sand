@@ -194,7 +194,6 @@ const createNewBeeper = (now) => {
   }
 }
 
-
 const beeper = () => {
   var now = audioCtx.currentTime
 
@@ -202,8 +201,10 @@ const beeper = () => {
     if (beepers[i].gainNode.gain.value === 1.0)
       beepers[i].gainNode.gain.linearRampToValueAtTime(0.0, now + rampDuration)
 
-    if (beepers[i].gainNode.gain.value === 0.0)
+    if (beepers[i].gainNode.gain.value === 0.0) {
       beepers[i].source.stop()
+      beepers.pop()
+    }
   }
 
   beepers.unshift(createNewBeeper(now))

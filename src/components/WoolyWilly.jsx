@@ -6,7 +6,7 @@ import {
 import Waveform from './Waveform'
 import './WoolyWilly.css'
 
-const WoolyWilly = ({ amplitudes, width, height, onMouseDown, onMouseUp, onMove }) => {
+const WoolyWilly = ({ amplitudes, frequency, width, height, onMouseDown, onMouseUp, onMove, onSetFrequency }) => {
   const stepSize = width / amplitudes.length
   const y = (height - 10) / 2
   const waveformPoints = amplitudes.map(({ value }, idx) => ({

@@ -126,10 +126,17 @@ const audio = (state = {}, action) => {
       return addBeeper(state, action.buffer, action.rampDuration)
     case 'CLEAN_UP_BEEPERS':
       return cleanupBeepers(state)
+    case 'SET_FREQUENCY_BY_FIELD':
+      return action.frequency
+    case 'SET_FREQUENCY_BY_SLIDER':
+      return logarithmicScaleToFrequency(action.power)
     default:
       return state
   }
 }
+
+const logarithmicScaleToFrequency = (power, arb = 20) =>
+  (Math.pow(2, power) * arb).toFixed(2)
 
 const appReducer = combineReducers({
   amplitudes,
@@ -146,6 +153,16 @@ const actions = {
   setMouseDown: position => ({ type: 'SET_MOUSE_DOWN', position }),
   setMouseUp: () => ({ type: 'SET_MOUSE_UP' })
 }
+
+const onSetFrequencyByField = e => store.dispatch({
+  type: 'SET_FREQUENCY_BY_FIELD',
+  frequency: e.target.value
+})
+
+const onSetFrequencyBySlider = e => store.dispatch({
+  type: 'SET_FREQUENCY_BY_SLIDER',
+  power: e.target.value
+})
 
 /////////////////START LISTENERS/////////////////
 
@@ -178,7 +195,6 @@ const onMove = e => {
   else
     return Promise.resolve(null)
 }
-
 /////////START STARTING/////////
 
 const initializeState = bufferLength => {

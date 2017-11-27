@@ -1,25 +1,25 @@
 import React from 'react'
 
-const Frequency = ({ frequency, onSetFrequency }) => {
+const frequencyToLogarithmicScale = (frequency, arb = 20) =>
+  Math.log2(frequency/arb)
+
+const Frequency = ({ frequency, onSetFrequencyByField, onSetFrequencyBySlider }) => {
   return (
     <div width="100%">
       <input
         className="frequency-slider"
         type="range"
-        min="50"
-        max="20000"
-        step="0.05"
+        min="0"
+        max="10"
+        step="0.0001"
         style={{width: 700}}
-        value={frequency}
-        onChange={onSetFrequency}
+        value={frequencyToLogarithmicScale(frequency)}
+        onChange={onSetFrequencyBySlider}
       />
       <input
         className="frequency-field"
-        min="50"
-        max="20000"
-        step="0.05"
         value={frequency}
-        onChange={onSetFrequency}
+        onChange={onSetFrequencyByField}
       />
     </div>
   )

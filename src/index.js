@@ -161,12 +161,20 @@ var audioCtx = new window.AudioContext({
 })
 var arrayBuffer = audioCtx.createBuffer(1, bufferLength, audioCtx.sampleRate)
 
-// keeps track of the active audioSourceNode
-var runningSource = null
+const rampDuration = 0.05
 
-const createNewBeeper = () => {
+// array to hold our dying beepers until they gracefully fade away
+var beepers = []
+
+const createNewBeeper = (now) => {
   var source = audioCtx.createBufferSource()
-  source.connect(audioCtx.destination)
+  var gainNode = audioCtx.createGain()
+
+  source.connect(gainNode)
+  gainNode.connect(audioCtx.destination)
+  gainNode.gain.setValueAtTime(0.0, now)
+  gainNode.gain.linearRampToValueAtTime(1.0, now + rampDuration);
+
   for (var channel = 0; channel < arrayBuffer.numberOfChannels; channel++) {
     var nowBuffering = arrayBuffer.getChannelData(channel)
     for (var i = 0; i < arrayBuffer.length; i++) {
@@ -175,17 +183,30 @@ const createNewBeeper = () => {
         nowBuffering[i] = value
     }
   }
+
   source.buffer = arrayBuffer
   source.loop = true
   source.start()
-  return source
+
+  return {
+    source: source,
+    gainNode: gainNode
+  }
 }
 
-const beeper = () => {
-  if (runningSource !== null)
-    runningSource.stop()
 
-  runningSource = createNewBeeper()
+const beeper = () => {
+  var now = audioCtx.currentTime
+
+  for (var i = 1; i < beepers.length; i++) {
+    if (beepers[i].gainNode.gain.value === 1.0)
+      beepers[i].gainNode.gain.linearRampToValueAtTime(0.0, now + rampDuration)
+
+    if (beepers[i].gainNode.gain.value === 0.0)
+      beepers[i].source.stop()
+  }
+
+  beepers.unshift(createNewBeeper(now))
 }
 
 store.subscribe(beeper)

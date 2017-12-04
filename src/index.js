@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { combineReducers, createStore } from 'redux';
 import './index.css';
 import registerServiceWorker from './registerServiceWorker';
-import WoolyWilly from './WoolyWilly'
+import WoolyWilly from './components/WoolyWilly'
 
 registerServiceWorker()
 
@@ -143,10 +143,10 @@ const actions = {
 
 /////////////////START LISTENERS/////////////////
 
-const onMouseDown = e => 
+const onMouseDown = e =>
   store.dispatch(actions.setMouseDown([e.evt.layerX, e.evt.layerY]))
 
-const onMouseUp = e => 
+const onMouseUp = e =>
   store.dispatch(actions.setMouseUp())
 
 const onMove = e => {

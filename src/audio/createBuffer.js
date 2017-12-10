@@ -1,5 +1,5 @@
 import Context from './Context'
-import { FUNDAMENTAL, SAMPLE_RATE } from './constants'
+import { SAMPLE_RATE } from './constants'
 
 export default data => {
   const buffer = Context.createBuffer(1, data.length, SAMPLE_RATE);

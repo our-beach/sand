@@ -3,12 +3,15 @@ import {
   Layer,
   Stage,
 } from 'react-konva'
-import Amplitude from './Amplitude'
-import './App.css';
+import Waveform from './Waveform'
+import './WoolyWilly.css'
 
 const WoolyWilly = ({ amplitudes, width, height, onMouseDown, onMouseUp, onMove }) => {
   const stepSize = width / amplitudes.length
   const y = (height - 10) / 2
+  const waveformPoints = amplitudes.map(({ value }, idx) => ({
+    x: idx * stepSize, y: (1 - value) * y
+  }));
 
   return (
     <Stage
@@ -20,9 +23,7 @@ const WoolyWilly = ({ amplitudes, width, height, onMouseDown, onMouseUp, onMove 
       onContentMousemove={onMove}
     >
       <Layer>
-        {amplitudes.map(({ value }, index) =>
-          <Amplitude key={index} x={index * stepSize} y={(1 - value) * y} />
-        )}
+        <Waveform points={waveformPoints} />
       </Layer>
     </Stage>
   )

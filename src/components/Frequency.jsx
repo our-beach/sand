@@ -1,9 +1,10 @@
 import React from 'react'
+import { logarithmicScaleToFrequency } from '../math'
 
 const frequencyToLogarithmicScale = (frequency, arb = 20) =>
   Math.log2(frequency/arb)
 
-const Frequency = ({ frequency, onSetFrequencyByField, onSetFrequencyBySlider }) => {
+const Frequency = ({ frequency, onSetFrequency }) => {
   return (
     <div width="100%">
       <input
@@ -14,12 +15,12 @@ const Frequency = ({ frequency, onSetFrequencyByField, onSetFrequencyBySlider })
         step="0.0001"
         style={{width: 700}}
         value={frequencyToLogarithmicScale(frequency)}
-        onChange={onSetFrequencyBySlider}
+        onChange={e => onSetFrequency(logarithmicScaleToFrequency(e.target.value))}
       />
       <input
         className="frequency-field"
         value={frequency}
-        onChange={onSetFrequencyByField}
+        onChange={e => onSetFrequency(e.target.value)}
       />
     </div>
   )

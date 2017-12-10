@@ -15,8 +15,7 @@ const WoolyWilly = ({
   onMouseDown,
   onMouseUp,
   onMove,
-  onSetFrequencyByField,
-  onSetFrequencyBySlider
+  onSetFrequency,
 }) => {
   const stepSize = width / amplitudes.length
   const y = (height - 10) / 2
@@ -40,9 +39,8 @@ const WoolyWilly = ({
       </Stage>
       <Frequency
         frequency={frequency}
-        onSetFrequencyByField={onSetFrequencyByField}
-        onSetFrequencyBySlider={onSetFrequencyBySlider}
-        />
+        onSetFrequency={onSetFrequency}
+      />
     </div>
   )
 }

@@ -4,14 +4,12 @@ import { combineReducers, createStore } from 'redux';
 import './index.css';
 import registerServiceWorker from './registerServiceWorker';
 import WoolyWilly from './components/WoolyWilly'
+import rampAudioNode from './audio/rampAudioNode'
+import createBeeper from './audio/createBeeper'
+import sineTable from './audio/sineTable'
+import disconnectBeeper from './audio/disconnectBeeper'
 
 registerServiceWorker()
-
-const frequency = 440
-
-const sampleRate = 44100
-
-const bufferLength = Math.floor(sampleRate/frequency)
 
 const amplitude = x => ({ value: x })
 
@@ -59,21 +57,29 @@ const interpolateAmplitudes = (amplitudes, startIndex, startValue, endIndex, end
   return prior.concat(modified).concat(posterior)
 }
 
-const addBeeper = (beeperArray, buffer, rampDuration) => {
-  const newBeeper = createNewBeeper(buffer, rampDuration);
-  beeperArray[0].gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + rampDuration)
+const addBeeper = ({ beepers, buffer }, data, rampDuration) => {
+  const newBeeper = createBeeper(220, 0.3, data, rampDuration);
+  rampAudioNode(beepers[0].gainNode, 0, rampDuration)
 
-  return [newBeeper, ...beeperArray]
+  return { beepers: [newBeeper, ...beepers], buffer }
 }
 
 const stopBeeper = beeper => {
-  if (beeper.gainNode.gain.value === 0) beeper.source.stop()
+  if (beeper.gainNode.gain.value === 0) {
+    disconnectBeeper(beeper)
+  }
   return beeper
 }
 
-const cleanupBeepers = beeperArray => beeperArray
-  .map(stopBeeper)
-  .filter(beeper => beeper.gainNode.gain.value > 0)
+const cleanupBeepers = ({ beepers }) => ({
+  beepers: beepers.reduce((result, beeper) => {
+    if (beeper.gainNode.gain.value === 0) {
+      disconnectBeeper(beeper)
+      return result
+    }
+    return [...result, beeper]
+  }, [])
+})
 
 /////////////////START REDUCERS/////////////////
 
@@ -114,7 +120,7 @@ const mouse = (state = {}, action) => {
   }
 }
 
-const beepers = (state = [], action) => {
+const audio = (state = {}, action) => {
   switch (action.type) {
     case 'ADD_BEEPER':
       return addBeeper(state, action.buffer, action.rampDuration)
@@ -128,7 +134,7 @@ const beepers = (state = [], action) => {
 const appReducer = combineReducers({
   amplitudes,
   mouse,
-  beepers
+  audio
 })
 
 /////////////////START ACTION CREATORS/////////////////
@@ -163,68 +169,33 @@ const onMove = e => {
       endValue: pixelToAmplitude(SCREEN_HEIGHT, layerY),
     })
 
-    const rampDuration = 0.05
-    store.dispatch(actions.addBeeper(store.getState().amplitudes, rampDuration))
-    setTimeout(() => store.dispatch(actions.cleanupBeepers()), rampDuration * 1000)
-
+    const rampDuration = 0.1
+    const data = store.getState().amplitudes.map(({ value }) => value);
+    store.dispatch(actions.addBeeper(data, rampDuration))
+    setTimeout(() => store.dispatch(actions.cleanupBeepers()), (rampDuration * 1000) + 10)
     store.dispatch(actions.setLastMousePosition([layerX, layerY]))
   }
   else
     return Promise.resolve(null)
 }
 
-/////////////////END ACTION CREATORS/////////////////
-
-const createNewBeeper = (newBuffer, rampDuration) => {
-  var source = audioCtx.createBufferSource()
-  var gainNode = audioCtx.createGain()
-
-  source.connect(gainNode)
-  gainNode.connect(audioCtx.destination)
-  gainNode.gain.setValueAtTime(0.0, audioCtx.currentTime)
-  gainNode.gain.linearRampToValueAtTime(1.0, audioCtx.currentTime + rampDuration);
-
-  for (var channel = 0; channel < arrayBuffer.numberOfChannels; channel++) {
-    var nowBuffering = arrayBuffer.getChannelData(channel)
-    for (var i = 0; i < arrayBuffer.length; i++) {
-      var value = newBuffer[i]['value']
-      if (value !== null)
-        nowBuffering[i] = value
-    }
-  }
-
-  source.buffer = arrayBuffer
-  source.loop = true
-  source.start()
-
-  return {
-    source: source,
-    gainNode: gainNode
-  }
-}
-
 /////////START STARTING/////////
 
-const initializeState = () => {
-  const amplitudes = Array(bufferLength).fill(null).map((_, idx) =>
-    amplitude(Math.sin(idx * 2 * Math.PI / bufferLength))
-  )
-  const beepers = [createNewBeeper(amplitudes, 0)]
+const initializeState = bufferLength => {
+  const amplitudes = sineTable(bufferLength).map(amplitude);
+  const data = amplitudes.map(({ value }) => value)
+  const audio = { beepers: [createBeeper(220, 0.3, data, 0.5)] }
 
   return {
     mouse: { down: false, lastPosition: [] },
     amplitudes,
-    beepers
+    audio,
   }
 }
 
-const audioCtx = new window.AudioContext()
-
-const arrayBuffer = audioCtx.createBuffer(1, bufferLength, sampleRate)
-
 const store = createStore(
   appReducer,
-  initializeState(),
+  initializeState(1024),
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 )
 

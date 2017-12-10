@@ -126,10 +126,14 @@ const audio = (state = {}, action) => {
       return addBeeper(state, action.buffer, action.rampDuration)
     case 'CLEAN_UP_BEEPERS':
       return cleanupBeepers(state)
-    case 'SET_FREQUENCY_BY_FIELD':
+    default:
+      return state
+  }
+}
+const frequency = (state = 0, action) => {
+  switch (action.type) {
+    case 'SET_FREQUENCY':
       return action.frequency
-    case 'SET_FREQUENCY_BY_SLIDER':
-      return logarithmicScaleToFrequency(action.power)
     default:
       return state
   }
@@ -141,7 +145,8 @@ const logarithmicScaleToFrequency = (power, arb = 20) =>
 const appReducer = combineReducers({
   amplitudes,
   mouse,
-  audio
+  audio,
+  frequency
 })
 
 /////////////////START ACTION CREATORS/////////////////
@@ -151,20 +156,22 @@ const actions = {
   addBeeper: (buffer, rampDuration) => ({ type: 'ADD_BEEPER', buffer, rampDuration }),
   cleanupBeepers: () => ({ type: 'CLEAN_UP_BEEPERS' }),
   setMouseDown: position => ({ type: 'SET_MOUSE_DOWN', position }),
-  setMouseUp: () => ({ type: 'SET_MOUSE_UP' })
+  setMouseUp: () => ({ type: 'SET_MOUSE_UP' }),
+  setFrequency: frequency => ({
+    frequency,
+    type: 'SET_FREQUENCY',
+  })
 }
 
-const onSetFrequencyByField = e => store.dispatch({
-  type: 'SET_FREQUENCY_BY_FIELD',
-  frequency: e.target.value
-})
-
-const onSetFrequencyBySlider = e => store.dispatch({
-  type: 'SET_FREQUENCY_BY_SLIDER',
-  power: e.target.value
-})
-
 /////////////////START LISTENERS/////////////////
+
+const onSetFrequencyByField = e =>
+      store.dispatch(actions.setFrequency(e.target.value))
+
+const onSetFrequencyBySlider = e =>
+      store.dispatch(actions.setFrequency(
+        logarithmicScaleToFrequency(e.target.value)
+      ))
 
 const onMouseDown = e =>
   store.dispatch(actions.setMouseDown([e.evt.layerX, e.evt.layerY]))
@@ -224,6 +231,8 @@ const render = () =>
       onMouseDown={onMouseDown}
       onMouseUp={onMouseUp}
       onMove={onMove}
+      onSetFrequencyByField={onSetFrequencyByField}
+      onSetFrequencyBySlider={onSetFrequencyBySlider}
     />,
     document.getElementById('root')
   )

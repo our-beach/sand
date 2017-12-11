@@ -179,14 +179,13 @@ const onSetFrequency = frequency => {
   return store.dispatch(actions.setBeeperFrequency(frequency))
 }
 
-const onMouseDown = e =>
-  store.dispatch(actions.setMouseDown([e.evt.layerX, e.evt.layerY]))
+const onGestureStart = coords =>
+      store.dispatch(actions.setMouseDown(coords))
 
-const onMouseUp = e =>
+const onGestureEnd = () =>
   store.dispatch(actions.setMouseUp())
 
-const onMove = e => {
-  const { evt: { layerX, layerY } } = e
+const onMove = ([layerX, layerY]) => {
   const { amplitudes, mouse: { down, lastPosition } } = store.getState()
   const [lastX, lastY] = lastPosition
 
@@ -239,8 +238,8 @@ const render = () =>
       frequency={store.getState().frequency}
       width={SCREEN_WIDTH}
       height={SCREEN_HEIGHT}
-      onMouseDown={onMouseDown}
-      onMouseUp={onMouseUp}
+      onGestureStart={onGestureStart}
+      onGestureEnd={onGestureEnd}
       onMove={onMove}
       onSetFrequency={onSetFrequency}
     />,

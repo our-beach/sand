@@ -1,178 +1,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { combineReducers, createStore } from 'redux';
+import { createStore } from 'redux';
 import './index.css';
 import registerServiceWorker from './registerServiceWorker';
+
+import actions from './actions/actions'
+import rootReducer from './reducers/rootReducer'
 import WoolyWilly from './components/WoolyWilly'
-import rampAudioNode from './audio/rampAudioNode'
-import createBeeper from './audio/createBeeper'
-import sineTable from './audio/sineTable'
-import disconnectBeeper from './audio/disconnectBeeper'
-import setSourceFrequency from './audio/setSourceFrequency'
 
 registerServiceWorker()
 
-const amplitude = x => ({ value: x })
-
 const SCREEN_WIDTH = 700
-
 const SCREEN_HEIGHT = 300
+
+const amplitude = x => ({ value: x })
 
 const pixelToIndex = (screenWidth, bufferSize, x) =>
   Math.round((x * bufferSize) / screenWidth)
 
 const pixelToAmplitude = (screenHeight, y) =>
   amplitude(1 - ((2 * y) / (screenHeight - 10)))
-
-const setAmplitude = (amplitudes, targetIndex, targetValue) => {
-  if (targetIndex >= amplitudes.length)
-    return amplitudes
-  else {
-    const newAmplitudes = Array.from(amplitudes)
-    newAmplitudes[targetIndex] = targetValue
-    return newAmplitudes
-  }
-}
-
-const interpolateAmplitudes = (amplitudes, startIndex, startValue, endIndex, endValue) => {
-  if (endIndex < startIndex)
-    return interpolateAmplitudes(
-      amplitudes,
-      endIndex,
-      endValue,
-      startIndex,
-      startValue
-    )
-
-  const slope = (endValue.value - startValue.value) / (endIndex - startIndex)
-  const prior = amplitudes.slice(0, startIndex)
-  const posterior = amplitudes.slice(endIndex + 1)
-
-  if (endIndex === startIndex)
-    return prior.concat([endValue]).concat(posterior)
-
-  const modified = amplitudes
-    .slice(startIndex, endIndex + 1)
-    .map(({ value }, idx) => amplitude((slope * idx) + startValue.value))
-
-  return prior.concat(modified).concat(posterior)
-}
-
-const addBeeper = ({ beepers, buffer }, frequency, data, rampDuration) => {
-  const newBeeper = createBeeper(frequency, 0.3, data, rampDuration);
-  rampAudioNode(beepers[0].gainNode, 0, rampDuration)
-
-  return { beepers: [newBeeper, ...beepers], buffer: data }
-}
-
-// const stopBeeper = beeper => {
-//   if (beeper.gainNode.gain.value === 0) {
-//     disconnectBeeper(beeper)
-//   }
-//   return beeper
-// }
-
-const cleanupBeepers = ({ beepers, buffer }) => ({
-  beepers: beepers.reduce((result, beeper) => {
-    if (beeper.gainNode.gain.value === 0) {
-      disconnectBeeper(beeper)
-      return result
-    }
-    return [...result, beeper]
-  }, []),
-  buffer
-})
-
-const setBeeperFrequency = ({ beepers, buffer }, frequency) => {
-  const [currentBeeper] = beepers
-  setSourceFrequency(currentBeeper.source, frequency, buffer)
-  return { beepers, buffer }
-}
-
-/////////////////START REDUCERS/////////////////
-
-const amplitudes = (state = [], action) => {
-  switch (action.type) {
-    case 'SET_AMPLITUDE':
-      return setAmplitude(state, action.index, action.value)
-    case 'INTERPOLATE_AMPLITUDES':
-      return interpolateAmplitudes(
-        state,
-        action.startIndex,
-        action.startValue,
-        action.endIndex,
-        action.endValue
-      )
-    default:
-      return state
-  }
-}
-
-const mouse = (state = {}, action) => {
-  switch (action.type) {
-    case 'SET_MOUSE_DOWN':
-      return {
-        ...state,
-        down: true,
-        lastPosition: action.position
-      }
-    case 'SET_MOUSE_UP':
-      return { ...state, down: false }
-    case 'SET_LAST_MOUSE_POSITION':
-      return {
-        ...state,
-        lastPosition: action.position
-      }
-    default:
-      return state
-  }
-}
-
-const audio = (state = {}, action) => {
-  switch (action.type) {
-    case 'ADD_BEEPER':
-      return addBeeper(state, action.frequency, action.buffer, action.rampDuration)
-    case 'CLEAN_UP_BEEPERS':
-      return cleanupBeepers(state)
-    case 'SET_BEEPER_FREQUENCY':
-      return setBeeperFrequency(state, action.frequency)
-    default:
-      return state
-  }
-}
-
-const frequency = (state = 0, action) => {
-  switch (action.type) {
-    case 'SET_FREQUENCY':
-      return action.frequency
-    default:
-      return state
-  }
-}
-
-const appReducer = combineReducers({
-  amplitudes,
-  mouse,
-  audio,
-  frequency
-})
-
-/////////////////START ACTION CREATORS/////////////////
-
-const actions = {
-  setLastMousePosition: position => ({ type: 'SET_LAST_MOUSE_POSITION', position }),
-  addBeeper: (frequency, buffer, rampDuration) => ({ type: 'ADD_BEEPER', frequency, buffer, rampDuration }),
-  cleanupBeepers: () => ({ type: 'CLEAN_UP_BEEPERS' }),
-  setBeeperFrequency: frequency => ({ type: 'SET_BEEPER_FREQUENCY', frequency }),
-  setMouseDown: position => ({ type: 'SET_MOUSE_DOWN', position }),
-  setMouseUp: () => ({ type: 'SET_MOUSE_UP' }),
-  setFrequency: frequency => ({
-    frequency,
-    type: 'SET_FREQUENCY',
-  })
-}
-
-/////////////////START LISTENERS/////////////////
 
 const onSetFrequency = frequency => {
   store.dispatch(actions.setFrequency(frequency))
@@ -191,44 +38,35 @@ const onMove = e => {
   const [lastX, lastY] = lastPosition
 
   if (down) {
-    store.dispatch({
-      type: 'INTERPOLATE_AMPLITUDES',
-      startIndex: pixelToIndex(SCREEN_WIDTH, amplitudes.length, lastX),
-      startValue: pixelToAmplitude(SCREEN_HEIGHT, lastY),
-      endIndex: pixelToIndex(SCREEN_WIDTH, amplitudes.length, layerX),
-      endValue: pixelToAmplitude(SCREEN_HEIGHT, layerY),
-    })
+    store.dispatch(actions.interpolateAmplitudes(
+      pixelToIndex(SCREEN_WIDTH, amplitudes.length, lastX),
+      pixelToAmplitude(SCREEN_HEIGHT, lastY),
+      pixelToIndex(SCREEN_WIDTH, amplitudes.length, layerX),
+      pixelToAmplitude(SCREEN_HEIGHT, layerY)
+    ))
 
     const rampDuration = 0.1
     const data = store.getState().amplitudes.map(({ value }) => value);
-    store.dispatch(actions.addBeeper(store.getState().frequency, data, rampDuration))
-    setTimeout(() => store.dispatch(actions.cleanupBeepers()), (rampDuration * 1000) + 10)
+
+    store.dispatch(actions.addBeeper(
+      store.getState().frequency,
+      data,
+      rampDuration
+    ))
+
+    setTimeout(() => store.dispatch(
+      actions.cleanupBeepers()),
+      (rampDuration * 1000) + 10
+    )
+
     store.dispatch(actions.setLastMousePosition([layerX, layerY]))
   }
   else
     return Promise.resolve(null)
 }
-/////////START STARTING/////////
-
-const initializeState = bufferLength => {
-  const amplitudes = sineTable(bufferLength).map(amplitude);
-  const data = amplitudes.map(({ value }) => value)
-  const audio = {
-    beepers: [createBeeper(220, 0.3, data, 0.5)],
-    buffer: data
-  }
-
-  return {
-    frequency: 440,
-    mouse: { down: false, lastPosition: [] },
-    amplitudes,
-    audio,
-  }
-}
 
 const store = createStore(
-  appReducer,
-  initializeState(1024),
+  rootReducer,
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 )
 

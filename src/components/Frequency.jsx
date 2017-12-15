@@ -1,8 +1,6 @@
 import React from 'react'
 import { logarithmicScaleToFrequency } from '../math'
-
-const frequencyToLogarithmicScale = (frequency, arb = 20) =>
-  Math.log2(frequency/arb)
+import { frequencyToLogarithmicScale } from '../math'
 
 const Frequency = ({ frequency, onSetFrequency }) => {
   return (

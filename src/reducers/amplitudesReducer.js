@@ -32,7 +32,7 @@ const interpolateAmplitudes = (amplitudes, startIndex, startValue, endIndex, end
     .slice(startIndex, endIndex + 1)
     .map(({ value }, idx) => amplitude((slope * idx) + startValue.value))
 
-  return prior.concat(modified).concat(posterior)
+  return [...prior, ...modified, ...posterior]
 }
 
 const amplitude = x => ({ value: x })

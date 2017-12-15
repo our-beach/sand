@@ -12,8 +12,8 @@ const WoolyWilly = ({
   frequency,
   width,
   height,
-  onMouseDown,
-  onMouseUp,
+  onGestureStart,
+  onGestureEnd,
   onMove,
   onSetFrequency,
 }) => {
@@ -29,10 +29,22 @@ const WoolyWilly = ({
         className='Stage'
         width={width}
         height={height}
-        onContentMousedown={onMouseDown}
-        onContentMouseup={onMouseUp}
-        onContentMousemove={onMove}
-        >
+        onContentMousedown={e => onGestureStart([e.evt.layerX, e.evt.layerY])}
+        onContentMouseup={e => onGestureEnd()}
+        onContentMousemove={e => onMove([
+          e.evt.layerX,
+          e.evt.layerY
+        ])}
+        onContentTouchstart={e => onGestureStart([
+          e.evt.targetTouches[0].clientX,
+          e.evt.targetTouches[0].clientY,
+        ])}
+        onContentTouchend={e => onGestureEnd()}
+        onContentTouchmove={e => onMove([
+          e.evt.targetTouches[0].clientX,
+          e.evt.targetTouches[0].clientY,
+        ])}
+      >
         <Layer>
           <Waveform points={waveformPoints} />
         </Layer>

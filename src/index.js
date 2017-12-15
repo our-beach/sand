@@ -4,7 +4,7 @@ import { createStore } from 'redux';
 import './index.css';
 import registerServiceWorker from './registerServiceWorker';
 
-import actions from './actions/actions'
+import * as actions from './actions'
 import rootReducer from './reducers/rootReducer'
 import WoolyWilly from './components/WoolyWilly'
 

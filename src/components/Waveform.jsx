@@ -15,7 +15,8 @@ const deriveLine = ([head, ...points]) =>
 
 export default props => (
   <Path
+    className="waveform"
     data={deriveLine(props.points)}
-    stroke="red"
+    stroke="#ff5252"
   />
 )

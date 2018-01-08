@@ -57,3 +57,10 @@ export const setFrequency = frequency => {
     frequency
   }
 }
+
+export const setWidth = width => {
+  return {
+    type: 'SET_WIDTH',
+    width
+  }
+}

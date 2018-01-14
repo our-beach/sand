@@ -3,15 +3,13 @@ import ReactDOM from 'react-dom';
 import { createStore } from 'redux';
 import './index.css';
 import registerServiceWorker from './registerServiceWorker';
+import 'antd/dist/antd.css'
 
 import * as actions from './actions'
 import rootReducer from './reducers/rootReducer'
-import WoolyWilly from './components/WoolyWilly'
+import App from './components/App'
 
 registerServiceWorker()
-
-const SCREEN_WIDTH = 700
-const SCREEN_HEIGHT = 300
 
 const amplitude = x => ({ value: x })
 
@@ -38,10 +36,10 @@ const onMove = ([layerX, layerY]) => {
 
   if (down) {
     store.dispatch(actions.interpolateAmplitudes(
-      pixelToIndex(SCREEN_WIDTH, amplitudes.length, lastX),
-      pixelToAmplitude(SCREEN_HEIGHT, lastY),
-      pixelToIndex(SCREEN_WIDTH, amplitudes.length, layerX),
-      pixelToAmplitude(SCREEN_HEIGHT, layerY)
+      pixelToIndex(store.getState().width, amplitudes.length, lastX),
+      pixelToAmplitude(store.getState().width/2, lastY),
+      pixelToIndex(store.getState().width, amplitudes.length, layerX),
+      pixelToAmplitude(store.getState().width/2, layerY)
     ))
 
     const rampDuration = 0.1
@@ -69,16 +67,18 @@ const store = createStore(
   window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 )
 
+window.onresize = () => store.dispatch(actions.setWidth(window.innerWidth))
+
 const render = () =>
   ReactDOM.render(
-    <WoolyWilly
+    <App
       amplitudes={store.getState().amplitudes}
-      frequency={store.getState().frequency}
-      width={SCREEN_WIDTH}
-      height={SCREEN_HEIGHT}
+      width={store.getState().width}
+      height={store.getState().width/2}
       onGestureStart={onGestureStart}
       onGestureEnd={onGestureEnd}
       onMove={onMove}
+      frequency={store.getState().frequency}
       onSetFrequency={onSetFrequency}
     />,
     document.getElementById('root')

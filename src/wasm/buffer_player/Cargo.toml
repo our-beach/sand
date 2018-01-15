@@ -1,0 +1,13 @@
+[package]
+name = "buffer_player"
+version = "0.1.0"
+authors = [
+  "clarkenciel <clarkenciel@gmail.com>",
+  "fakemonster <jgraythel@gmail.com>"
+]
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+lazy_static = "1.0.0"

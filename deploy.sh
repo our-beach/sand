@@ -25,13 +25,19 @@ SHA=`git rev-parse --verify HEAD`
 git clone $REPO build
 cd build
 git checkout $TARGET_BRANCH || git checkout --orphan $TARGET_BRANCH
-
-# Clean out existing contents
-git ls-files | xargs rm -rf
 cd ..
+
+echo "Moving old git config"
+mv build/.git ./.git.bak
+
+echo "Removing old files"
+rm -rf build/**/*
 
 # Run our compile script
 doCompile
+
+echo "Replacing git config"
+mv .git.bak build/.git
 
 # Now let's go have some fun with the cloned repo
 cd build

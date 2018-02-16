@@ -10,7 +10,6 @@ const Oscilloscope = ({
   width,
   height,
   onGestureStart,
-  onGestureEnd,
   onMove,
 }) => {
   const stepSize = width / amplitudes.length
@@ -24,7 +23,6 @@ const Oscilloscope = ({
       width={width}
       height={height}
       onContentMousedown={e => onGestureStart([e.evt.layerX, e.evt.layerY])}
-      onContentMouseup={e => onGestureEnd()}
       onContentMousemove={e => onMove([
         e.evt.layerX,
         e.evt.layerY
@@ -33,7 +31,6 @@ const Oscilloscope = ({
         e.evt.targetTouches[0].clientX,
         e.evt.targetTouches[0].clientY,
       ])}
-      onContentTouchend={e => onGestureEnd()}
       onContentTouchmove={e => onMove([
         e.evt.targetTouches[0].clientX,
         e.evt.targetTouches[0].clientY,

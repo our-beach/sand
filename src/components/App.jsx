@@ -12,16 +12,21 @@ const App = ({
   onSetFrequency,
 }) => {
   return (
-    <WoolyWilly
-      amplitudes={amplitudes}
-      width={width}
-      height={height}
-      onGestureStart={onGestureStart}
-      onGestureEnd={onGestureEnd}
-      onMove={onMove}
-      frequency={frequency}
-      onSetFrequency={onSetFrequency}
-    />
+    <div
+      id="app"
+      onMouseUp={e => onGestureEnd()}
+      onTouchEnd={e => onGestureEnd()}
+    >
+      <WoolyWilly
+        amplitudes={amplitudes}
+        width={width}
+        height={height}
+        onGestureStart={onGestureStart}
+        onMove={onMove}
+        frequency={frequency}
+        onSetFrequency={onSetFrequency}
+      />
+    </div>
   )
 }
 

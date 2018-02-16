@@ -2,6 +2,10 @@ body {
   font-family: sans-serif;
 }
 
+#root, #app {
+  height: 100%;
+}
+
 .wooly-willy {
   max-width: 736px;
   margin: auto;
@@ -15,3 +19,4 @@ body {
   margin-bottom: 16px;
   border-radius: 4px;
 }
+

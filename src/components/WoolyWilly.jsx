@@ -7,7 +7,6 @@ const WoolyWilly = ({
   width,
   height,
   onGestureStart,
-  onGestureEnd,
   onMove,
   frequency,
   onSetFrequency,
@@ -19,7 +18,6 @@ const WoolyWilly = ({
         width={width}
         height={height}
         onGestureStart={onGestureStart}
-        onGestureEnd={onGestureEnd}
         onMove={onMove}
       />
       <Frequency

@@ -64,3 +64,9 @@ export const setWidth = width => {
     width
   }
 }
+
+export const toggleMute = () => {
+  return {
+    type: 'TOGGLE_MUTE'
+  }
+}

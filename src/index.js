@@ -24,8 +24,11 @@ const onSetFrequency = frequency => {
   return store.dispatch(actions.setBeeperFrequency(frequency))
 }
 
+const onToggleMute = () =>
+  store.dispatch(actions.toggleMute())
+
 const onGestureStart = coords =>
-      store.dispatch(actions.setMouseDown(coords))
+  store.dispatch(actions.setMouseDown(coords))
 
 const onGestureEnd = () =>
   store.dispatch(actions.setMouseUp())
@@ -80,6 +83,8 @@ const render = () =>
       onMove={onMove}
       frequency={store.getState().frequency}
       onSetFrequency={onSetFrequency}
+      muted={store.getState().audio.muted}
+      onToggleMute={onToggleMute}
     />,
     document.getElementById('root')
   )

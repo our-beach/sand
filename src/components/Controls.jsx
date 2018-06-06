@@ -2,14 +2,20 @@ import React from 'react'
 import { logarithmicScaleToFrequency } from '../math'
 import { frequencyToLogarithmicScale } from '../math'
 import { Row, Col, InputNumber, Slider } from 'antd'
+import Mute from './Mute'
 
 const addHertzLabel = value => `${value} Hz`
 const removeHertzLabel = value => value.replace(/[^\d.]/g, '')
 
-const Frequency = ({ frequency, onSetFrequency }) => {
+const Controls = ({
+  frequency,
+  onSetFrequency,
+  muted,
+  onToggleMute,
+}) => {
   return (
     <Row
-      className="frequency"
+      className="controls"
       gutter={16}
     >
       <Col span={3}>
@@ -21,7 +27,7 @@ const Frequency = ({ frequency, onSetFrequency }) => {
           parser={removeHertzLabel}
         />
       </Col>
-      <Col xs={24} md={21}>
+      <Col xs={24} md={19}>
         <Slider
           className="slider"
           min={0}
@@ -32,8 +38,15 @@ const Frequency = ({ frequency, onSetFrequency }) => {
           tipFormatter={null}
         />
       </Col>
+      <Col span={2}>
+        <Mute
+          muted={muted}
+          onToggleMute={onToggleMute}
+        />
+      </Col>
     </Row>
   )
 }
 
-export default Frequency
+export default Controls
+

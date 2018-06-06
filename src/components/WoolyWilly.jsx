@@ -1,6 +1,6 @@
 import React from 'react'
 import Oscilloscope from './Oscilloscope'
-import Frequency from './Frequency'
+import Controls from './Controls'
 
 const WoolyWilly = ({
   amplitudes,
@@ -10,6 +10,8 @@ const WoolyWilly = ({
   onMove,
   frequency,
   onSetFrequency,
+  muted,
+  onToggleMute,
 }) => {
   return (
     <div className="wooly-willy">
@@ -20,9 +22,11 @@ const WoolyWilly = ({
         onGestureStart={onGestureStart}
         onMove={onMove}
       />
-      <Frequency
+      <Controls
         frequency={frequency}
         onSetFrequency={onSetFrequency}
+        muted={muted}
+        onToggleMute={onToggleMute}
       />
     </div>
   )

@@ -22,7 +22,10 @@ const Oscilloscope = ({
     <Stage className="oscilloscope"
       width={width}
       height={height}
-      onContentMousedown={e => onGestureStart([e.evt.layerX, e.evt.layerY])}
+      onContentMousedown={e => onGestureStart([
+        e.evt.layerX,
+        e.evt.layerY
+      ])}
       onContentMousemove={e => onMove([
         e.evt.layerX,
         e.evt.layerY

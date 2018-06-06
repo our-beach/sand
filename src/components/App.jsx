@@ -10,6 +10,8 @@ const App = ({
   onMove,
   frequency,
   onSetFrequency,
+  muted,
+  onToggleMute,
 }) => {
   return (
     <div
@@ -25,6 +27,8 @@ const App = ({
         onMove={onMove}
         frequency={frequency}
         onSetFrequency={onSetFrequency}
+        muted={muted}
+        onToggleMute={onToggleMute}
       />
     </div>
   )

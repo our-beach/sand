@@ -5,14 +5,14 @@ import setSourceFrequency from '../audio/setSourceFrequency'
 import sineTable from '../audio/sineTable'
 import { INITIAL_FREQUENCY, BUFFER_LENGTH } from '../constants'
 
-const addBeeper = ({ beepers, buffer, muted }, frequency, data, rampDuration) => {
+const addBeeper = ({ beepers, buffer, ...rest }, frequency, data, rampDuration) => {
   const newBeeper = createBeeper(frequency, 0.3, data, rampDuration);
   rampAudioNode(beepers[0].gainNode, 0, rampDuration)
 
-  return { beepers: [newBeeper, ...beepers], buffer: data, muted }
+  return { beepers: [newBeeper, ...beepers], buffer: data, ...rest }
 }
 
-const cleanupBeepers = ({ beepers, buffer, muted }) => ({
+const cleanupBeepers = ({ beepers, ...rest }) => ({
   beepers: beepers.reduce((result, beeper) => {
     if (beeper.gainNode.gain.value === 0) {
       disconnectBeeper(beeper)
@@ -20,23 +20,21 @@ const cleanupBeepers = ({ beepers, buffer, muted }) => ({
     }
     return [...result, beeper]
   }, []),
-  buffer,
-  muted
+  ...rest
 })
 
-const setBeeperFrequency = ({ beepers, buffer, muted }, frequency) => {
+const setBeeperFrequency = ({ beepers, buffer, ...rest }, frequency) => {
   const [currentBeeper] = beepers
   setSourceFrequency(currentBeeper.source, frequency, buffer)
-  return { beepers, buffer, muted }
+  return { beepers, buffer, ...rest }
 }
 const amplitude = x => ({ value: x })
 const amplitudes = sineTable(BUFFER_LENGTH).map(amplitude)
 const data = amplitudes.map(({ value }) => value)
 
-const toggleMute = ({ beepers, buffer, muted }) => ({
-  beepers,
-  buffer,
-  muted: !muted
+const toggleMute = ({ muted, ...rest }) => ({
+  muted: !muted,
+  ...rest
 })
 
 const initialState = {

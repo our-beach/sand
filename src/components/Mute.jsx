@@ -1,10 +1,12 @@
 import React from 'react'
 
-const Mute = ({ muted, onToggleMute }) => {
+const Mute = ({ className, muted, onToggleMute }) => {
   return (
-    <i className="material-icons" style={{ fontSize: 32 }} onClick={onToggleMute}>
-      { muted ? 'volume_off' : 'volume_up' }
-    </i>
+    <div className={className}>
+      <i className="material-icons" style={{ fontSize: 32 }} onClick={onToggleMute}>
+        { muted ? 'volume_off' : 'volume_up' }
+      </i>
+    </div>
   )
 }
 

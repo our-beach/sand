@@ -20,3 +20,39 @@ body {
   border-radius: 4px;
 }
 
+i {
+  cursor: default;
+}
+
+.controls {
+  width: 100%;
+  display: grid;
+  align-items: center;
+}
+
+.field {
+  grid-area: field;
+}
+.slider {
+  grid-area: slider;
+}
+.mute {
+  grid-area: mute;
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+@media all and (max-width: 767px) {
+  .controls {
+    grid-template-areas:
+    "field mute"
+    "slider slider";
+  }
+}
+
+@media all and (min-width: 768px) {
+  .controls {
+    grid-template-columns: auto 5fr auto;
+    grid-template-areas: "field slider mute";
+  }
+}

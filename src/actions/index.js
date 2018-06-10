@@ -65,8 +65,9 @@ export const setWidth = width => {
   }
 }
 
-export const toggleMute = () => {
+export const toggleMute = rampDuration => {
   return {
-    type: 'TOGGLE_MUTE'
+    type: 'TOGGLE_MUTE',
+    rampDuration
   }
 }

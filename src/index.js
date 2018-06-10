@@ -24,8 +24,23 @@ const onSetFrequency = frequency => {
   return store.dispatch(actions.setBeeperFrequency(frequency))
 }
 
-const onToggleMute = () =>
-  store.dispatch(actions.toggleMute())
+const onToggleMute = () => {
+  const rampDuration = 0.1
+  if (store.getState().audio.muted) {
+    const data = store.getState().amplitudes.map(({ value }) => value);
+    store.dispatch(actions.addBeeper(
+      store.getState().frequency,
+      data,
+      rampDuration
+    ))
+    setTimeout(() => store.dispatch(
+      actions.cleanupBeepers()),
+      (rampDuration * 1000) + 10
+    )
+  }
+
+  return store.dispatch(actions.toggleMute(rampDuration))
+}
 
 const onGestureStart = coords =>
   store.dispatch(actions.setMouseDown(coords))
@@ -34,7 +49,7 @@ const onGestureEnd = () =>
   store.dispatch(actions.setMouseUp())
 
 const onMove = ([layerX, layerY]) => {
-  const { amplitudes, mouse: { down, lastPosition } } = store.getState()
+  const { amplitudes, mouse: { down, lastPosition }, audio: { muted } } = store.getState()
   const [lastX, lastY] = lastPosition
 
   if (down) {
@@ -48,16 +63,18 @@ const onMove = ([layerX, layerY]) => {
     const rampDuration = 0.1
     const data = store.getState().amplitudes.map(({ value }) => value);
 
-    store.dispatch(actions.addBeeper(
-      store.getState().frequency,
-      data,
-      rampDuration
-    ))
+    if(!muted) {
+      store.dispatch(actions.addBeeper(
+        store.getState().frequency,
+        data,
+        rampDuration
+      ))
 
-    setTimeout(() => store.dispatch(
-      actions.cleanupBeepers()),
-      (rampDuration * 1000) + 10
-    )
+      setTimeout(() => store.dispatch(
+        actions.cleanupBeepers()),
+        (rampDuration * 1000) + 10
+      )
+    }
 
     store.dispatch(actions.setLastMousePosition([layerX, layerY]))
   }

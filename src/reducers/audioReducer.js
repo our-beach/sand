@@ -32,15 +32,19 @@ const amplitude = x => ({ value: x })
 const amplitudes = sineTable(BUFFER_LENGTH).map(amplitude)
 const data = amplitudes.map(({ value }) => value)
 
-const toggleMute = ({ muted, ...rest }) => ({
-  muted: !muted,
-  ...rest
-})
+const toggleMute = ({ muted, beepers, ...rest }, rampDuration) => {
+  if (!muted) rampAudioNode(beepers[0].gainNode, 0, rampDuration);
+  return {
+    muted: !muted,
+    beepers,
+    ...rest
+  }
+}
 
 const initialState = {
   beepers : [createBeeper(INITIAL_FREQUENCY, 0.3, data, 0.5)],
   buffer: data,
-  muted: true
+  muted: false
 }
 
 const audio = (state = initialState, action) => {
@@ -61,7 +65,8 @@ const audio = (state = initialState, action) => {
       )
     case 'TOGGLE_MUTE':
       return toggleMute(
-        state
+        state,
+        action.rampDuration
       )
     default:
       return state
@@ -69,3 +74,4 @@ const audio = (state = initialState, action) => {
 }
 
 export default audio
+
